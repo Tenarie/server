@@ -452,7 +452,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 			Please note that UnitAuraProcHandler is not made to handle interactions like sweeping strike + Whirlwind/Cleave at all
 			reason being that UnitAuraProcHandler process the case for each hit and not per ability which results in a charge dropped per hit.
 			Instead modification to Spell.cpp has been made for whirlwind (SPELLFAMILY_WARRIOR) and cleave which handles the charge withdrawlas.
-			1 Charge is always withdrawn everytime you use whirlwind from spell.cpp
+			1 Charge is always withdrawn everytime you use whirlwind from spell.cpp which is why you will +1 added charges in the prochandler here.
 			*/
 
 			//Fetch sweeping strike aura for being able to get and modify the amount the charges.
