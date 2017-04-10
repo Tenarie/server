@@ -444,10 +444,22 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     triggered_spell_id = 25997;
                     break;
                 }
-                 // Sweeping Strikes
+	   // Sweeping Strikes
 		case 12292:
 		case 18765:
 		{
+			/*
+			Please note that UnitAuraProcHandler is not made to handle interactions like sweeping strike + Whirlwind/Cleave at all
+			reason being that UnitAuraProcHandler process the case for each hit and not per ability which results in a charge dropped per hit.
+			Instead modification to Spell.cpp has been made for whirlwind (SPELLFAMILY_WARRIOR) and cleave which handles the charge withdrawlas.
+			1 Charge is always withdrawn everytime you use whirlwind from spell.cpp
+			*/
+
+			//Fetch sweeping strike aura for being able to get and modify the amount the charges.
+			Aura* sweepingStrikeAura = GetAura(12292, EFFECT_INDEX_0);
+			SpellAuraHolder* sweepingStrikeHolder = sweepingStrikeAura->GetHolder();
+			int CurrentCharges = sweepingStrikeHolder->GetAuraCharges();
+
 			// Prevent chain of triggered spell from same triggered spell
 			if (procSpell && procSpell->Id == 26654)
 				return SPELL_AURA_PROC_FAILED;
@@ -456,7 +468,25 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 				return SPELL_AURA_PROC_FAILED;
 
 			target = SelectRandomUnfriendlyTarget(pVictim);
-			if (!target)
+			//Adjusting sweeping strike range to the same as whirlwind range incase the procSpell is WW (yes this is really necessary)
+			//in Spell.cpp under SPELLFAMILY_WARRIOR(Whirlwind) a simmilar adjustment is made which decides the range of where SS will remove a charge 
+			if (procSpell && procSpell->Id == 1680)
+			{
+				target = SelectRandomUnfriendlyTarget(pVictim, 7.7);
+			}
+
+			//This adds a charge to SS, also 1 charge is withdrawn in the spell.cpp case if no target B is nearby but whirlwind or cleave hits a target A only.
+			if ((!target && procSpell && procSpell->Id == 1680) || (!target && procSpell && procSpell->Id == 20569))
+			{
+				sweepingStrikeHolder->SetAuraCharges(CurrentCharges + 1);
+				return SPELL_AURA_PROC_FAILED;
+			}
+			else if (!pVictim)
+			{
+				sweepingStrikeHolder->SetAuraCharges(CurrentCharges + 1);
+				return SPELL_AURA_PROC_FAILED;
+			}
+			else if (!target)
 				return SPELL_AURA_PROC_FAILED;
 
 			// Case for Execute. This will only run when procced by Execute
@@ -467,6 +497,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 				{
 					basepoints[0] = damage * 100 / CalcArmorReducedDamage(pVictim, 100);
 					triggered_spell_id = 12723; //Note this SS id deals 1 damage by itself (Cannot crit)
+
 				}
 				else if (pVictim->GetHealthPercent() < 20.0f)	// If only Target A is sub 20% and target B is over 20% do Basic attack damage
 				{
@@ -478,6 +509,30 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 					triggered_spell_id = 12723;	//Note this SS id deals 1 damage by itself (Cannot crit)
 				}
 			}
+
+			// Case for Whirlwind and cleave. This will only run when procced by Whirlwind or cleave.
+			else if ((procSpell && procSpell->Id == 1680) || (procSpell && procSpell->Id == 20569))
+			{
+
+
+				basepoints[0] = damage * 100 / CalcArmorReducedDamage(pVictim, 100);
+				triggered_spell_id = 12723;	//Note this SS id deals 1 damage by itself (Cannot crit)
+
+				//Adding a charge to the aura since when the case reaches "break;" a charge will be withdrawn.
+				sweepingStrikeHolder->SetAuraCharges(CurrentCharges + 1);
+
+				//Remove aura when charges reaches 0
+				if (CurrentCharges == 0)
+				{
+					RemoveAura(12292, EFFECT_INDEX_0);
+				}
+
+			}
+			else if (GetAura(20230, EFFECT_INDEX_0))
+				{ 
+				basepoints[0] = damage * 100 / CalcArmorReducedDamage(pVictim, 100);
+				triggered_spell_id = 12723;	//Note this SS id deals 1 damage by itself (Cannot crit)
+				}
 			else // Full damage on anything else 
 			{
 				basepoints[0] = damage * 100 / CalcArmorReducedDamage(pVictim, 100);
@@ -486,16 +541,46 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 
 			break;
 		}
-                // Retaliation
-                case 20230:
-                {
-                    // check attack comes not from behind
-                    if (!HasInArc(M_PI_F, pVictim))
-                        return SPELL_AURA_PROC_FAILED;
 
-                    triggered_spell_id = 22858;
-                    break;
-                }
+		// Retaliation
+		case 20230:
+		{
+			// check attack comes not from behind
+			if (!HasInArc(M_PI_F, pVictim))
+			{	
+				return SPELL_AURA_PROC_FAILED;
+			}
+			else 
+			{
+				triggered_spell_id = 22858;
+			}
+
+			//Get random target and check if sweeping strike aura is on and a pVictim is available
+			target = SelectRandomUnfriendlyTarget(pVictim);
+			if (GetAura(12292, EFFECT_INDEX_0) && (pVictim))
+			{
+				//Get aura for modification of charges
+				Aura* sweepingStrikeAura = GetAura(12292, EFFECT_INDEX_0);
+				SpellAuraHolder* sweepingStrikeHolder = sweepingStrikeAura->GetHolder();
+				int CurrentCharges = sweepingStrikeHolder->GetAuraCharges();
+
+				//Cast sweeping strike proc, the reason CastSpell is used because only one "triggered_spell_id" can be used in each case
+				//Otherwise the last "Triggered_spell_ID" in the case will be used before the break.
+				CastSpell(pVictim, 26654, true, castItem, triggeredByAura);
+
+				//Remove aura if at 0
+				if (CurrentCharges == 0)
+				{
+					RemoveAura(12292, EFFECT_INDEX_0);
+				}
+
+				//Removes a charge from sweeping strike aura
+				sweepingStrikeHolder->SetAuraCharges(CurrentCharges - 1);
+
+			}
+
+			break;
+		}
                 // Twisted Reflection (boss spell)
                 case 21063:
                     triggered_spell_id = 21064;
