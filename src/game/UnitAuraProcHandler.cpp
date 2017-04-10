@@ -577,6 +577,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 					{
 						RemoveAura(12292, EFFECT_INDEX_0);
 					}
+					//Removes a charge from sweeping strike aura
 					sweepingStrikeHolder->SetAuraCharges(CurrentCharges - 1);
 				}
 				else
@@ -584,7 +585,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 					target = pVictim;
 					triggered_spell_id = 22858;
 				}
-				//Removes a charge from sweeping strike aura
 
 			}
 			triggered_spell_id = 22858;
