@@ -3190,7 +3190,7 @@ void Spell::cast(bool skipCheck)
 		}
 
 
-		if (m_spellInfo->Id == 20569)                   //Cleave
+		if (m_spellInfo->Id == 20569 || m_spellInfo->Id == 845 || m_spellInfo->Id == 7369 || m_spellInfo->Id == 11608 || m_spellInfo->Id == 11609)  //Cleave all ranks
 		{
 			if (m_caster->GetAura(12292, EFFECT_INDEX_0)) //Sweeping Strike
 			{
