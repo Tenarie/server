@@ -490,7 +490,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 
 
                     //This adds a charge to SS, also 1 charge is withdrawn in the spell.cpp case if no target B is nearby but whirlwind or cleave hits a target A only.
-                    if (!target && procSpell && ((procSpell->Id == WhirlWind) || (procSpell->Id == CleaveRank5) || (procSpell->Id == CleaveRank1) || (procSpell->Id == CleaveRank2) || (procSpell->Id == CleaveRank3) || (procSpell->Id == CleaveRank4)))
+                    if (!target && procSpell && ((procSpell->Id == WhirlWind) || (procSpell->Id == CleaveRank1) || (procSpell->Id == CleaveRank2) || (procSpell->Id == CleaveRank3) || (procSpell->Id == CleaveRank4) || (procSpell->Id == CleaveRank5)))
 
                     {
                         sweepingStrike->SetAuraCharges(CurrentCharges + 1);
