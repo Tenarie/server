@@ -3161,13 +3161,22 @@ void Spell::cast(bool skipCheck)
         }
 	case SPELLFAMILY_WARRIOR:
         {
-            if (m_spellInfo->Id == 1680)                   //Whirlwind
+            int WhirlWind = 1680;
+            int SweepingStrikeAuraID = 12292;
+            int CleaveRank1 = 845;
+            int CleaveRank2 = 7369;
+            int CleaveRank3 = 11608;
+            int CleaveRank4 = 11609;
+            int CleaveRank5 = 20569;
+
+            if (m_spellInfo->Id == WhirlWind)                   //Whirlwind
             {
-                if (m_caster->GetAura(12292, EFFECT_INDEX_0)) //Sweeping Strike
+                if (m_caster->GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0)) //Sweeping Strike
                     {
 
                     //This handles removal of one stack and makes sure it doesn't remove a stack if whirlwind doesn't hit anything.
-                        Aura* sweepingStrikeAura = m_caster->GetAura(12292, EFFECT_INDEX_0);
+
+                        Aura* sweepingStrikeAura = m_caster->GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0);
                         SpellAuraHolder* sweepingStrikeHolder = sweepingStrikeAura->GetHolder();
                         int32 CurrentCharges = sweepingStrikeHolder->GetAuraCharges();
 
@@ -3186,16 +3195,17 @@ void Spell::cast(bool skipCheck)
                     }
             break;
             }
+
             
         
-            if (m_spellInfo->Id == 20569 || m_spellInfo->Id == 845 || m_spellInfo->Id == 7369 || m_spellInfo->Id == 11608 || m_spellInfo->Id == 11609)  //Cleave all ranks
+            if (m_spellInfo->Id == CleaveRank1 || m_spellInfo->Id == CleaveRank2 || m_spellInfo->Id == CleaveRank3 || m_spellInfo->Id == CleaveRank4 || m_spellInfo->Id == CleaveRank5)  //Cleave all ranks
                                                                                                                                                                          
             {
-                if (m_caster->GetAura(12292, EFFECT_INDEX_0)) //Sweeping Strike
+                if (m_caster->GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0)) //Sweeping Strike
                 {
                     //This handles removal of one charge for sweepingstrike
 
-                        Aura* sweepingStrikeAura = m_caster->GetAura(12292, EFFECT_INDEX_0);
+                        Aura* sweepingStrikeAura = m_caster->GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0);
                         SpellAuraHolder* sweepingStrikeHolder = sweepingStrikeAura->GetHolder();
                         int32 CurrentCharges = sweepingStrikeHolder->GetAuraCharges();
 
