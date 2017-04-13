@@ -444,9 +444,26 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                     triggered_spell_id = 25997;
                     break;
                 }
-                // Sweeping Strikes
+            //Sweeping strikes NPCS
+            case 18765:
+                {
+                    // prevent chain of triggered spell from same triggered spell
+                    if (procSpell && procSpell->Id == 26654)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+
+                    target = SelectRandomUnfriendlyTarget(pVictim);
+                    if (!target)
+                    {
+                        return SPELL_AURA_PROC_FAILED;
+                    }
+
+                    triggered_spell_id = 26654;
+                    break;
+                }
+                // Sweeping Strikes players
                 case 12292:
-                case 18765:
                 {
                     /*
                     Please note that UnitAuraProcHandler is not made to handle interactions like sweeping strike + Whirlwind/Cleave at all
