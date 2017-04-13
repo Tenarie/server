@@ -570,6 +570,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
             
                     if (GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0) && (target))
                     {
+			//Checks if a random target is nearby.
                         target = SelectRandomUnfriendlyTarget(pVictim);
                         if (target)
                         {
@@ -593,6 +594,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                         }
                         else
                         {
+			    //If a random target is not nearby proc retaliation.
                             target = pVictim;
                             triggered_spell_id = RetaliationProc;
                         }
