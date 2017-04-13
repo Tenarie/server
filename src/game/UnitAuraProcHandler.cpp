@@ -566,7 +566,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
 
 
 
-                    //Get random target and check if sweeping strike aura is on and a random target is available
+                    //Get random target and check if sweeping strike aura is on and a target is available
             
                     if (GetAura(SweepingStrikeAuraID, EFFECT_INDEX_0) && (target))
                     {
